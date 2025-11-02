@@ -247,9 +247,21 @@ export default definePlugin({
     settings,
 
     toolboxActions: {
+        // Example: Legacy function format (still works)
         "Reconnect"() {
             socket?.close(1000, "Reconnecting");
             initWs(true);
+        },
+        // Example: Checkbox type
+        "Auto-connect on Start": {
+            type: "checkbox",
+            label: "Auto-connect on Start",
+            get checked() {
+                return settings.store.notifyOnAutoConnect;
+            },
+            action(checked) {
+                settings.store.notifyOnAutoConnect = checked ?? false;
+            }
         }
     },
 

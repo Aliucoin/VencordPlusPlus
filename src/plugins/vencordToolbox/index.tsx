@@ -44,12 +44,51 @@ function VencordPopout(onClose: () => void) {
                     {Object.entries(plugin.toolboxActions).map(([text, action]) => {
                         const key = `vc-toolbox-${plugin.name}-${text}`;
 
+                        // Support legacy function format
+                        if (typeof action === "function") {
+                            return (
+                                <Menu.MenuItem
+                                    id={key}
+                                    key={key}
+                                    label={text}
+                                    action={action}
+                                />
+                            );
+                        }
+
+                        // Support new ToolboxAction format
+                        const toolboxAction = action;
+                        const type = toolboxAction.type ?? "button";
+
+                        if (type === "custom" && toolboxAction.render) {
+                            return toolboxAction.render(key);
+                        }
+
+                        if (type === "checkbox") {
+                            return (
+                                <Menu.MenuCheckboxItem
+                                    id={key}
+                                    key={key}
+                                    label={toolboxAction.label}
+                                    checked={toolboxAction.checked ?? false}
+                                    action={() => {
+                                        const currentChecked = toolboxAction.checked ?? false;
+                                        toolboxAction.action?.(!currentChecked);
+                                    }}
+                                    disabled={toolboxAction.disabled}
+                                />
+                            );
+                        }
+
+                        // Default button type
                         return (
                             <Menu.MenuItem
                                 id={key}
                                 key={key}
-                                label={text}
-                                action={action}
+                                label={toolboxAction.label}
+                                action={() => toolboxAction.action?.()}
+                                icon={toolboxAction.icon}
+                                disabled={toolboxAction.disabled}
                             />
                         );
                     })}
